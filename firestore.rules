@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper to validate member document structure
+    function isValidMember(data) {
+      return data.keys().hasAll(['id', 'name', 'title', 'role', 'accessCode'])
+        && data.id is string
+        && data.name is string
+        && data.title in ['Bro', 'Sis']
+        && data.role in ['member', 'admin', 'secretary']
+        && data.accessCode is string;
+    }
+
+    // Helper to validate activity document structure
+    function isValidActivity(data) {
+      return data.keys().hasAll(['id', 'name', 'dayOfWeek'])
+        && data.id is string
+        && data.name is string
+        && data.dayOfWeek is string;
+    }
+
+    // Helper to validate attendance session document structure
+    function isValidSession(data) {
+      return data.keys().hasAll(['id', 'activityId', 'date', 'records'])
+        && data.id is string
+        && data.activityId is string
+        && data.date is string
+        && data.records is list;
+    }
+
+    // Helper to validate house fellowship notice document structure
+    function isValidNotice(data) {
+      return data.keys().hasAll(['id', 'topic', 'date', 'time', 'host', 'address'])
+        && data.id is string
+        && data.topic is string
+        && data.date is string
+        && data.time is string
+        && data.host is string
+        && data.address is string;
+    }
+
+    // Members collection rules
+    match /members/{memberId} {
+      allow read: if true;
+      allow create, update: if isValidMember(request.resource.data);
+      allow delete: if true;
+    }
+
+    // Activities collection rules
+    match /activities/{activityId} {
+      allow read: if true;
+      allow create, update: if isValidActivity(request.resource.data);
+      allow delete: if true;
+    }
+
+    // Sessions collection rules
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow create, update: if isValidSession(request.resource.data);
+      allow delete: if true;
+    }
+
+    // Notices collection rules
+    match /notices/{noticeId} {
+      allow read: if true;
+      allow create, update: if isValidNotice(request.resource.data);
+      allow delete: if true;
+    }
+  }
+}
